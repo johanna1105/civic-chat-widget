@@ -1,0 +1,27 @@
+{
+  "name": "civic-chat-widget",
+  "version": "1.0.0",
+  "description": "A standalone chat widget for CDN delivery",
+  "main": "dist/widget.min.js",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johanna1105/civic-chat-widget.git"
+  },
+  "keywords": [
+    "chat",
+    "widget",
+    "cdn"
+  ],
+  "author": "Johanna Tille",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.19.0"
+  }
+}

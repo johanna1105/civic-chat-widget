@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://cdn.jsdelivr.net 'sha384-g6lH99Zo06jIhG846kMVw7xWoMQXHrBGW1OpjxeLlsR3aDM+KemouwWGq7ZkN6u+';
+        style-src 'self' https://cdn.jsdelivr.net 'sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb';
+        connect-src 'self';
+        font-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+    ">
+    <title>Civic Chat Widget - CSP Strict Example</title>
+    <link rel="stylesheet" 
+          href="../dist/widget.min.css"
+          integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb"
+          crossorigin="anonymous">
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .csp-info {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #0369a1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Civic Chat Widget - CSP Strict Example</h1>
+    
+    <div class="csp-info">
+        <h3>🔒 Strict CSP Headers Active</h3>
+        <p>This example uses separate CSS file and SRI for both JS and CSS. No 'unsafe-inline' required!</p>
+        <p><strong>CSP Directive:</strong> <code>style-src 'self' https://cdn.jsdelivr.net 'sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb'</code></p>
+    </div>
+
+    <!-- Widget Mount Point -->
+    <div id="civic-chat" 
+         data-api-url="/api/chat" 
+         data-config-url="/api/config.json">
+    </div>
+
+    <!-- Widget Script with SRI -->
+    <script 
+        src="../dist/widget.min.js"
+        integrity="sha384-g6lH99Zo06jIhG846kMVw7xWoMQXHrBGW1OpjxeLlsR3aDM+KemouwWGq7ZkN6u+"
+        crossorigin="anonymous" 
+        async></script>
+    <script>
+        window.CivicChat && window.CivicChat.init({
+            useExternalCSS: true // Important for CSP compliance
+        });
+    </script>
+</body>
+</html>
