@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "build": "node build.js",
+    "sri": "node generate-sri.js",
+    "deploy": "npm run build && npm run sri",
     "prepublishOnly": "npm run build"
   },
   "repository": {
