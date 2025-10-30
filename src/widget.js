@@ -1,345 +1,202 @@
-(function (window, document) {
+(function(window, document) {
     'use strict';
-
-    // Utility functions
-    function qs(selector, root = document) {
-        return root.querySelector(selector);
+    
+    console.log('🚀 Civic Chat Widget loading...');
+    
+    // Einfache Utility Funktionen
+    function $(selector) {
+        return document.querySelector(selector);
     }
-
+    
     function readData(el, key, fallback) {
-        if (!el || !el.dataset) return fallback;
-        const value = el.dataset[key];
-        return value !== undefined ? value : fallback;
+        return el?.dataset?.[key] || fallback;
     }
-
-    function generateId() {
-        return 'civic-' + Math.random().toString(36).substr(2, 9);
-    }
-
-    // Configuration loader
-    async function loadConfig(url) {
-        try {
-            const res = await fetch(url, { 
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            if (!res.ok) throw new Error('Config load failed: ' + res.status);
-            return await res.json();
-        } catch (error) {
-            console.warn('[CivicChat] Config load failed:', error);
-            return {};
-        }
-    }
-
-    // Consent management
-    async function checkConsent(acceptUrl) {
-        if (!acceptUrl || acceptUrl === 'false') return true;
+    
+    // Haupt Initialisierungsfunktion
+    function init(options) {
+        console.log('🎯 CivicChat init called', options);
         
-        try {
-            const res = await fetch(acceptUrl, {
-                method: 'GET',
-                credentials: 'same-origin'
-            });
-            return res.ok;
-        } catch (error) {
-            console.warn('[CivicChat] Consent check failed:', error);
-            return false;
-        }
-    }
-
-    // Style injection with nonce support
-    function injectStyles(cssContent, nonce) {
-        // Check if styles already injected
-        if (document.querySelector('style[data-civic-chat]')) {
-            return;
-        }
-
-        const style = document.createElement('style');
-        style.setAttribute('data-civic-chat', '');
-        if (nonce) style.setAttribute('nonce', nonce);
-        style.textContent = cssContent;
-        document.head.appendChild(style);
-    }
-
-    // Widget class
-    function CivicChatWidget(options = {}) {
-        this.options = options;
-        this.id = generateId();
-        this.isOpen = false;
-        this.messages = [];
-        this.ready = false;
-        this.initialize();
-    }
-
-    CivicChatWidget.prototype.initialize = function() {
-        this.createToggleButton();
-        this.createWidget();
-        this.bindEvents();
-        this.loadInitialData();
-    };
-
-    CivicChatWidget.prototype.createToggleButton = function() {
-        this.toggleButton = document.createElement('button');
-        this.toggleButton.className = 'civic-chat__toggle';
-        this.toggleButton.innerHTML = '💬';
-        this.toggleButton.setAttribute('aria-label', 'Open chat');
-        document.body.appendChild(this.toggleButton);
-    };
-
-    CivicChatWidget.prototype.createWidget = function() {
-        // Create widget container
-        this.container = document.createElement('div');
-        this.container.className = 'civic-chat civic-chat--hidden';
-        this.container.id = this.id;
-
-        // Widget HTML structure
-        this.container.innerHTML = `
-            <div class="civic-chat__header">
-                <h3 class="civic-chat__title">${this.options.title || 'Civic Chat'}</h3>
-                <button class="civic-chat__close" aria-label="Close chat">×</button>
-            </div>
-            <div class="civic-chat__messages"></div>
-            <div class="civic-chat__input-area">
-                <input type="text" class="civic-chat__input" placeholder="Type your message..." />
-                <button class="civic-chat__send">Send</button>
-            </div>
-            <div class="civic-chat__consent" style="display: none;">
-                <p>You need to accept the chat terms to continue.</p>
-                <button class="civic-chat__consent-button">Accept</button>
-            </div>
-        `;
-
-        document.body.appendChild(this.container);
-        
-        // Cache DOM elements
-        this.messagesContainer = qs('.civic-chat__messages', this.container);
-        this.input = qs('.civic-chat__input', this.container);
-        this.sendButton = qs('.civic-chat__send', this.container);
-        this.closeButton = qs('.civic-chat__close', this.container);
-        this.consentSection = qs('.civic-chat__consent', this.container);
-        this.consentButton = qs('.civic-chat__consent-button', this.container);
-    };
-
-    CivicChatWidget.prototype.bindEvents = function() {
-        this.sendButton.addEventListener('click', () => this.sendMessage());
-        this.input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendMessage();
-        });
-        this.closeButton.addEventListener('click', () => this.hide());
-        this.consentButton.addEventListener('click', () => this.handleConsent());
-        this.toggleButton.addEventListener('click', () => this.toggle());
-        
-        // Close on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isOpen) {
-                this.hide();
-            }
-        });
-    };
-
-    CivicChatWidget.prototype.loadInitialData = function() {
-        var self = this;
-        var configUrl = this.options.configUrl;
-        
-        // Load configuration
-        if (configUrl) {
-            loadConfig(configUrl).then(function(config) {
-                self.options = Object.assign({}, self.options, config);
-                self.checkConsent();
-            }).catch(function() {
-                self.checkConsent();
-            });
-        } else {
-            this.checkConsent();
-        }
-    };
-
-    CivicChatWidget.prototype.checkConsent = function() {
-        var self = this;
-        var consentEndpoint = this.options.consentEndpoint;
-        
-        checkConsent(consentEndpoint).then(function(hasConsent) {
-            if (!hasConsent && consentEndpoint && consentEndpoint !== 'false') {
-                self.showConsentPrompt();
-            } else {
-                self.ready = true;
-                self.addMessage('bot', self.options.welcomeMessage || 'Hello! How can I help you today?');
-            }
-        });
-    };
-
-    CivicChatWidget.prototype.showConsentPrompt = function() {
-        this.consentSection.style.display = 'block';
-        this.input.disabled = true;
-        this.sendButton.disabled = true;
-    };
-
-    CivicChatWidget.prototype.handleConsent = function() {
-        var self = this;
-        var consentEndpoint = this.options.consentEndpoint;
-        
-        if (!consentEndpoint) return;
-
-        fetch(consentEndpoint, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(function(res) {
-            if (res.ok) {
-                self.consentSection.style.display = 'none';
-                self.input.disabled = false;
-                self.sendButton.disabled = false;
-                self.ready = true;
-                self.addMessage('bot', 'Thank you! How can I help you today?');
-            }
-        }).catch(function(error) {
-            console.error('[CivicChat] Consent submission failed:', error);
-        });
-    };
-
-    CivicChatWidget.prototype.show = function() {
-        if (!this.ready && this.consentSection.style.display !== 'block') {
-            this.showConsentPrompt();
-            return;
-        }
-
-        this.container.classList.remove('civic-chat--hidden');
-        this.isOpen = true;
-        this.toggleButton.innerHTML = '✕';
-        this.toggleButton.setAttribute('aria-label', 'Close chat');
-        setTimeout(() => this.input.focus(), 100);
-    };
-
-    CivicChatWidget.prototype.hide = function() {
-        this.container.classList.add('civic-chat--hidden');
-        this.isOpen = false;
-        this.toggleButton.innerHTML = '💬';
-        this.toggleButton.setAttribute('aria-label', 'Open chat');
-    };
-
-    CivicChatWidget.prototype.toggle = function() {
-        if (this.isOpen) {
-            this.hide();
-        } else {
-            this.show();
-        }
-    };
-
-    CivicChatWidget.prototype.addMessage = function(sender, text) {
-        var message = {
-            id: generateId(),
-            sender: sender,
-            text: text,
-            timestamp: new Date()
-        };
-
-        this.messages.push(message);
-        this.renderMessage(message);
-        this.scrollToBottom();
-    };
-
-    CivicChatWidget.prototype.renderMessage = function(message) {
-        var messageEl = document.createElement('div');
-        messageEl.className = 'civic-chat__message civic-chat__message--' + message.sender;
-        messageEl.textContent = message.text;
-        this.messagesContainer.appendChild(messageEl);
-    };
-
-    CivicChatWidget.prototype.showTypingIndicator = function() {
-        var typingEl = document.createElement('div');
-        typingEl.className = 'civic-chat__typing';
-        typingEl.textContent = 'Typing...';
-        typingEl.id = 'typing-indicator';
-        this.messagesContainer.appendChild(typingEl);
-        this.scrollToBottom();
-    };
-
-    CivicChatWidget.prototype.hideTypingIndicator = function() {
-        var typingEl = qs('#typing-indicator', this.messagesContainer);
-        if (typingEl) typingEl.remove();
-    };
-
-    CivicChatWidget.prototype.sendMessage = function() {
-        var text = this.input.value.trim();
-        if (!text || !this.ready) return;
-
-        // Add user message
-        this.addMessage('user', text);
-        this.input.value = '';
-        this.sendButton.disabled = true;
-
-        // Show typing indicator
-        this.showTypingIndicator();
-
-        var self = this;
-        
-        // Simulate API call - replace with actual API
-        setTimeout(function() {
-            self.hideTypingIndicator();
-            self.sendButton.disabled = false;
-            self.addMessage('bot', 'I received: "' + text + '". This is a demo response from the widget.');
-        }, 1000 + Math.random() * 1000);
-    };
-
-    CivicChatWidget.prototype.scrollToBottom = function() {
-        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-    };
-
-    CivicChatWidget.prototype.destroy = function() {
-        if (this.container && this.container.parentNode) {
-            this.container.parentNode.removeChild(this.container);
-        }
-        if (this.toggleButton && this.toggleButton.parentNode) {
-            this.toggleButton.parentNode.removeChild(this.toggleButton);
-        }
-    };
-
-    // Global initialization function
-    async function init(options) {
-        var el = options?.el || qs('#civic-chat');
+        const el = options?.el || $('#civic-chat');
         if (!el) {
-            console.warn('[CivicChat] No element found for initialization');
-            return null;
+            console.warn('❌ No civic-chat element found');
+            return;
         }
-
-        // Read configuration from data attributes
-        var config = {
-            apiUrl: options?.apiUrl || readData(el, 'apiUrl', '/chat'),
-            consentEndpoint: options?.consentEndpoint || readData(el, 'consentEndpoint', '/accept'),
-            configUrl: options?.configUrl || readData(el, 'configUrl', ''),
-            title: options?.title || readData(el, 'title', 'Civic Chat'),
-            welcomeMessage: options?.welcomeMessage || readData(el, 'welcomeMessage', 'Hello! How can I help you today?'),
-            lang: options?.lang || readData(el, 'lang', 'en')
-        };
-
-        // Handle nonce for CSP
-        var scriptEl = document.currentScript;
-        var nonce = (scriptEl && scriptEl.getAttribute('nonce')) || options?.nonce;
-
-        // Inject styles with nonce support if not using external CSS
-        if (!options?.useExternalCSS) {
-            // In production, CSS would be injected here
-            // For now, we rely on external CSS file
-            console.log('[CivicChat] Styles should be loaded via external CSS file for CSP compliance');
-        }
-
-        // Create and initialize widget
-        var widget = new CivicChatWidget(config);
         
-        // Auto-show if specified
-        if (options?.autoShow !== false) {
-            setTimeout(function() { 
-                if (widget.ready) widget.show(); 
-            }, 500);
+        console.log('✅ Found element:', el);
+        
+        // Erstelle einfachen Toggle Button
+        const toggleBtn = document.createElement('button');
+        toggleBtn.textContent = '💬';
+        toggleBtn.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        `;
+        
+        // Erstelle Chat Container
+        const chatContainer = document.createElement('div');
+        chatContainer.style.cssText = `
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+        `;
+        
+        // Chat Header
+        const header = document.createElement('div');
+        header.style.cssText = `
+            background: #2563eb;
+            color: white;
+            padding: 16px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+        header.innerHTML = `
+            <h3 style="margin: 0; font-size: 16px;">${readData(el, 'title', 'Civic Chat')}</h3>
+            <button style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">×</button>
+        `;
+        
+        // Messages Bereich
+        const messages = document.createElement('div');
+        messages.style.cssText = `
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: #f8fafc;
+        `;
+        
+        // Input Bereich
+        const inputArea = document.createElement('div');
+        inputArea.style.cssText = `
+            padding: 16px;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            gap: 8px;
+            background: white;
+        `;
+        inputArea.innerHTML = `
+            <input type="text" placeholder="Type a message..." style="flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;">
+            <button style="background: #2563eb; color: white; border: none; padding: 12px 16px; border-radius: 8px; cursor: pointer;">Send</button>
+        `;
+        
+        // Baue Chat zusammen
+        chatContainer.appendChild(header);
+        chatContainer.appendChild(messages);
+        chatContainer.appendChild(inputArea);
+        
+        // Füge Elemente zum DOM hinzu
+        document.body.appendChild(toggleBtn);
+        document.body.appendChild(chatContainer);
+        
+        // Event Handler
+        let isOpen = false;
+        
+        toggleBtn.addEventListener('click', function() {
+            isOpen = !isOpen;
+            chatContainer.style.display = isOpen ? 'flex' : 'none';
+            console.log('Chat toggled:', isOpen);
+        });
+        
+        header.querySelector('button').addEventListener('click', function() {
+            isOpen = false;
+            chatContainer.style.display = 'none';
+        });
+        
+        const input = inputArea.querySelector('input');
+        const sendBtn = inputArea.querySelector('button');
+        
+        function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+            
+            // User Message
+            const userMsg = document.createElement('div');
+            userMsg.textContent = text;
+            userMsg.style.cssText = `
+                background: #2563eb;
+                color: white;
+                padding: 12px;
+                border-radius: 12px;
+                margin: 8px 0;
+                max-width: 80%;
+                align-self: flex-end;
+                border-bottom-right-radius: 4px;
+            `;
+            messages.appendChild(userMsg);
+            
+            input.value = '';
+            
+            // Bot Response (simuliert)
+            setTimeout(() => {
+                const botMsg = document.createElement('div');
+                botMsg.textContent = 'Thanks for your message: ' + text;
+                botMsg.style.cssText = `
+                    background: white;
+                    color: #334155;
+                    padding: 12px;
+                    border-radius: 12px;
+                    margin: 8px 0;
+                    max-width: 80%;
+                    align-self: flex-start;
+                    border: 1px solid #e1e5e9;
+                    border-bottom-left-radius: 4px;
+                `;
+                messages.appendChild(botMsg);
+                messages.scrollTop = messages.scrollHeight;
+            }, 1000);
         }
-
-        return widget;
+        
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Welcome Message
+        setTimeout(() => {
+            const welcomeMsg = document.createElement('div');
+            welcomeMsg.textContent = readData(el, 'welcomeMessage', 'Hello! How can I help you?');
+            welcomeMsg.style.cssText = `
+                background: white;
+                color: #334155;
+                padding: 12px;
+                border-radius: 12px;
+                margin: 8px 0;
+                max-width: 80%;
+                align-self: flex-start;
+                border: 1px solid #e1e5e9;
+                border-bottom-left-radius: 4px;
+            `;
+            messages.appendChild(welcomeMsg);
+        }, 500);
+        
+        console.log('🎉 Civic Chat Widget initialized successfully!');
     }
-
-    // Export to global scope
-    window.CivicChat = { init: init, CivicChatWidget: CivicChatWidget };
+    
+    // Exportiere zur globalen Scope
+    window.CivicChat = {
+        init: init
+    };
+    
+    console.log('✅ Civic Chat Widget loaded. Available as window.CivicChat');
+    
 })(window, document);
