@@ -23,7 +23,7 @@ CDN-chat widget.
 <!-- Script -->
 <script 
     src="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@main/dist/widget.min.js"
-    integrity="sha384-zMpLxbF0YwbAPIrg4SYhYAyrY0pgd1u3aMR6KMpSB6a6MEQSgBVvD3rF99BR/ZjN"
+    integrity="sha384-Qt578g++/yNNIlbi9XsAVVWxI+CfLFLgs2OiruQa7Vkpo5SwRrKXTB+PqnsheVnu"
     crossorigin="anonymous" 
     async></script>
 

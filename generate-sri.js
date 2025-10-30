@@ -21,11 +21,11 @@ function generateSRI() {
         
         const htmlSnippet = `<!-- Civic Chat Widget with SRI -->
 <link rel="stylesheet" 
-      href="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v2.0.0/dist/widget.min.css"
+      href="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v2.0.1/dist/widget.min.css"
       integrity="sha384-${cssHash}"
       crossorigin="anonymous">
 
-<script src="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v2.0.0/dist/widget.min.js"
+<script src="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v2.0.1/dist/widget.min.js"
         integrity="sha384-${jsHash}"
         crossorigin="anonymous"></script>
 
