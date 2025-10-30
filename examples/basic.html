@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Civic Chat Widget - Basic Example</title>
+    <title>Civic Chat Widget Test</title>
     <link rel="stylesheet" href="../dist/widget.min.css">
     <style>
         body {
@@ -11,92 +11,34 @@
             padding: 20px;
             max-width: 800px;
             margin: 0 auto;
-            line-height: 1.6;
-        }
-        .instructions {
             background: #f8fafc;
+        }
+        .info {
+            background: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin: 20px 0;
             border-left: 4px solid #2563eb;
-        }
-        code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.9em;
-        }
-        pre {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 16px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <h1>Civic Chat Widget - Basic Example</h1>
+    <h1>🧪 Civic Chat Widget Test</h1>
     
-    <div class="instructions">
-        <h3>🚀 Integration Code:</h3>
-        <pre><code>&lt;!-- Mount point with configuration --&gt;
-&lt;div id="civic-chat" 
-     data-api-url="/api/chat" 
-     data-consent-endpoint="/api/consent"
-     data-title="Support Chat"
-     data-welcome-message="Hello! How can we help you?"&gt;
-&lt;/div&gt;
-
-&lt;!-- Widget CSS --&gt;
-&lt;link rel="stylesheet" 
-      href="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@1.0.0/dist/widget.min.css"
-      integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb"
-      crossorigin="anonymous"&gt;
-
-&lt;!-- Widget JS with SRI --&gt;
-&lt;script 
-    src="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@1.0.0/dist/widget.min.js"
-    integrity="sha384-g6lH99Zo06jIhG846kMVw7xWoMQXHrBGW1OpjxeLlsR3aDM+KemouwWGq7ZkN6u+"
-    crossorigin="anonymous" 
-    async&gt;&lt;/script&gt;
-
-&lt;!-- Initialization --&gt;
-&lt;script&gt;
-    window.CivicChat && window.CivicChat.init();
-&lt;/script&gt;</code></pre>
+    <div class="info">
+        <h3>Widget sollte erscheinen:</h3>
+        <p>Unten rechts sollte ein blauer Chat-Button erscheinen: 💬</p>
     </div>
-
-    <h2>📖 How it works:</h2>
-    <ul>
-        <li>Widget loads asynchronously without blocking page render</li>
-        <li>Configuration via <code>data-*</code> attributes</li>
-        <li>SRI hashes ensure integrity</li>
-        <li>CSS and JS are cached immutable for 1 year</li>
-        <li>No external dependencies - pure vanilla JS</li>
-    </ul>
 
     <!-- Widget Mount Point -->
     <div id="civic-chat" 
-         data-api-url="/api/chat" 
-         data-consent-endpoint="/api/consent"
-         data-title="Support Chat"
-         data-welcome-message="Hello! How can we help you today?">
+         data-api-url="/api/chat"
+         data-title="Test Widget"
+         data-welcome-message="Hallo! Das Widget funktioniert!">
     </div>
 
-    <!-- Widget Implementation -->
-    <link rel="stylesheet" 
-          href="../dist/widget.min.css"
-          integrity="sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb"
-          crossorigin="anonymous">
-
-    <script 
-        src="../dist/widget.min.js" 
-        integrity="sha384-g6lH99Zo06jIhG846kMVw7xWoMQXHrBGW1OpjxeLlsR3aDM+KemouwWGq7ZkN6u+"
-        crossorigin="anonymous" 
-        async></script>
+    <!-- Widget Script -->
+    <script src="../dist/widget.min.js"></script>
     <script>
         window.CivicChat && window.CivicChat.init();
     </script>
