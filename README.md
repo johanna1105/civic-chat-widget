@@ -16,13 +16,13 @@ CDN-chat widget.
 
 <!-- Styles -->
 <link rel="stylesheet" 
-      href="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@main/dist/widget.min.css"
+      href="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v1.0.1/dist/widget.min.css"
       integrity="sha384-esQLXx6+tYzpomr0enQUlEgejEWcQBu/KiguLZo5VSlGzjweHs3HpVeisnAlfFEt"
       crossorigin="anonymous">
 
 <!-- Script -->
 <script 
-    src="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@main/dist/widget.min.js"
+    src="https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v1.0.1/dist/widget.min.js"
     integrity="sha384-Qt578g++/yNNIlbi9XsAVVWxI+CfLFLgs2OiruQa7Vkpo5SwRrKXTB+PqnsheVnu"
     crossorigin="anonymous" 
     async></script>
@@ -35,9 +35,9 @@ CDN-chat widget.
 
 ## CDN URLs
 
-- **Latest**: `https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@main/dist/widget.min.js`
+- **Latest**: `https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v1.0.1/dist/widget.min.js`
 
-- **CSS**: `https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@main/dist/widget.min.css`
+- **CSS**: `https://cdn.jsdelivr.net/gh/johanna1105/civic-chat-widget@v1.0.1/dist/widget.min.css`
 
 ## Configuration
 
